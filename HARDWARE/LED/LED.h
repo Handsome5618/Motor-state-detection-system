@@ -4,5 +4,6 @@
 #include "sys.h"
 
 void LED_Init(void);
+void Moto_Init(void);
 
 #endif

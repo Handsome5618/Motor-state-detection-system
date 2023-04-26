@@ -13,6 +13,32 @@ PA1:IIC_SCL_OLED      PA2:IIC_SDA_OLED
 #include "stdio.h"
 #include "angle.h"
 #include "led.h"
+#include "ds18b20.h"
+#include "countsensor.h"
+#include "timer.h"
+
+float T;
+extern u16 Speed;
+
+//int main(void)
+//{
+//	LED_Init();
+//	delay_init();				//延时初始化
+//	OLED_Init();
+//	OLED_ColorTurn(0);          //0正常显示，1 反色显示
+//	OLED_DisplayTurn(0);        //0正常显示 1 屏幕翻转显示
+//	MPU_Init();				    //初始化MPU6050
+//	USART1_Init();
+//	CountSensor_Init();
+//	Timer_Init();
+//	Moto_Init();
+
+//	while(1)
+//	{
+//		T = DS18B20_Get_Temp();	
+//		printf("speed:  %d\r\n",(u16)Speed);
+//	}
+//}
 
 int main(void)
 {	 
@@ -29,6 +55,9 @@ int main(void)
 	OLED_DisplayTurn(0);        //0正常显示 1 屏幕翻转显示
 	MPU_Init();				    //初始化MPU6050
 	USART1_Init();
+	CountSensor_Init();
+	Timer_Init();
+	Moto_Init();
 	 
 	OLED_ShowString(15,0,"Waiting",24,1);
 	OLED_ShowString(0,28,"Initialise",24,1);
@@ -49,33 +78,35 @@ int main(void)
 	OLED_ColorTurn(0);          //0正常显示，1 反色显示
 	OLED_DisplayTurn(0);        //0正常显示 1 屏幕翻转显示
 
-	OLED_ShowString(0,0,"PITCH:",16,1);
-	OLED_ShowString(0,15,"ROLL:",16,1);
-	OLED_ShowString(0,31,"YAW:",16,1);
-	OLED_ShowString(0,47,"TEMP:",16,1);
+	OLED_ShowString(0,0,"PITCH:",12,1);
+	OLED_ShowString(0,12,"ROLL:",12,1);
+	OLED_ShowString(0,24,"YAW:",12,1);
+	OLED_ShowString(0,36,"TEMP:",12,1);
+	OLED_ShowString(0,48,"SPEED:        r/min",12,1);
 	OLED_Refresh();
  	while(1)
 	{
 		if(mpu_dmp_get_data(&pitch,&roll,&yaw)==0)
 		{
+			T = DS18B20_Get_Temp();	
 			temp=MPU_Get_Temperature();					//得到温度值
 			MPU_Get_Accelerometer(&aacx,&aacy,&aacz);	//得到加速度传感器数据
 			MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);	//得到陀螺仪数据			
 			
-			printf("P%d ",(int)pitch);
-			printf("R%d ",(int)roll);
-			printf("y%d ",(int)yaw);
-//			printf("temp:  %d\r\n",(int)temp);
-//			printf(" \r\n");
+			printf("Pitch  %f\r\n",(float)pitch);
+			printf("Roll  %f\r\n",(float)roll);
+			printf("Yaw  %f\r\n",(float)yaw);
+			printf("temp:  %f\r\n",(float)temp/100);
+			printf("T:  %f\r\n",(float)T);
+			printf("speed:  %d\r\n",(u16)Speed);
+			printf(" \r\n");
 			
-			OLED_ShowFloat(50, 0,pitch,1,16,1);
-			OLED_ShowFloat(50,15,roll,5,16,1);
-			OLED_ShowFloat(50,31,yaw,5,16,1);
-			OLED_ShowFloat(50,47,(float)temp/100,5,16,1);
-			OLED_Refresh();	
-
-//			Send_Angle();
-
+			OLED_ShowFloat(50, 0,pitch,1,12,1);
+			OLED_ShowFloat(50,12,roll,5,12,1);
+			OLED_ShowFloat(50,24,yaw,5,12,1);
+			OLED_ShowFloat(50,36,T,5,12,1);
+			OLED_ShowNum(50,48,Speed,5,12,1);
+			OLED_Refresh();			
 		}
 	} 	
 }
